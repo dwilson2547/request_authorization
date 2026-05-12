@@ -1,5 +1,6 @@
 services:
   server:
+    image: dwilson2547/request-auth-server:latest
     build:
       context: .
       dockerfile: server/Dockerfile
@@ -14,7 +15,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - data:/data
+      - ./data:/data
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 9003 || exit 1"]
       interval: 5s
@@ -24,6 +25,7 @@ services:
     restart: unless-stopped
 
   api:
+    image: dwilson2547/request-auth-api:latest
     build: ./api
     ports:
       - "9001:8000"
@@ -31,19 +33,17 @@ services:
       DB_PATH: /data/request_auth.db
       GRPC_STATUS_URL: http://server:9003/status
     volumes:
-      - data:/data
+      - ./data:/data
     depends_on:
       server:
         condition: service_healthy
     restart: unless-stopped
 
   ui:
+    image: dwilson2547/request-auth-ui:latest
     build: ./ui
     ports:
       - "9002:80"
     depends_on:
       - api
     restart: unless-stopped
-
-volumes:
-  data:
