@@ -116,6 +116,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install build pytest grpcio protobuf
           pip install -e ./client
+      - name: Fail if version already exists on PyPI
+        working-directory: client
+        run: |
+          python - <<'PY'
+          import pathlib, tomllib, urllib.error, urllib.request
+          pyproject = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+          name = pyproject["project"]["name"]
+          version = pyproject["project"]["version"]
+          url = f"https://pypi.org/pypi/{name}/{version}/json"
+          try:
+              urllib.request.urlopen(url)
+          except urllib.error.HTTPError as exc:
+              if exc.code == 404:
+                  print(f"{name}=={version} is new on PyPI")
+              else:
+                  raise
+          else:
+              raise SystemExit(f"{name}=={version} already exists on PyPI")
+          PY
       - name: Run client tests
         run: pytest -q client/tests
       - name: Build client package
