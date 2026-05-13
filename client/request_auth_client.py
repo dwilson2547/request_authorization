@@ -22,19 +22,13 @@ Usage::
 """
 
 import queue
-import sys
 import threading
 from typing import Optional
 
 import grpc
 
-from proto import permit_pb2
-
-# grpcio codegen commonly emits `import permit_pb2 as permit__pb2`.
-# Alias the packaged module name so imports work without path hacks.
-sys.modules.setdefault("permit_pb2", permit_pb2)
-
-from proto import permit_pb2_grpc
+from request_auth_proto import permit_pb2
+from request_auth_proto import permit_pb2_grpc
 
 
 class RequestAuthClient:
