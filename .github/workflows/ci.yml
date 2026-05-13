@@ -26,15 +26,15 @@ jobs:
         with:
           filters: |
             server:
-              - 'services/request_authorization/server/**'
-              - 'services/request_authorization/proto/**'
+              - 'server/**'
+              - 'proto/**'
             api:
-              - 'services/request_authorization/api/**'
+              - 'api/**'
             ui:
-              - 'services/request_authorization/ui/**'
+              - 'ui/**'
             client:
-              - 'services/request_authorization/client/**'
-              - 'services/request_authorization/proto/**'
+              - 'client/**'
+              - 'proto/**'
 
   server-pr:
     if: github.event_name == 'pull_request' && needs.changes.outputs.server == 'true'
@@ -55,7 +55,7 @@ jobs:
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.4.0
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
       - name: Generate Go proto stubs
-        working-directory: services/request_authorization/server/app
+        working-directory: server/app
         run: |
           mkdir -p proto
           protoc \
@@ -64,7 +64,7 @@ jobs:
             -I ../../proto \
             ../../proto/permit.proto
       - name: Test and build server
-        working-directory: services/request_authorization/server/app
+        working-directory: server/app
         run: |
           go test ./...
           go build ./...
@@ -81,9 +81,9 @@ jobs:
       - name: Install API deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r services/request_authorization/api/requirements.txt
+          pip install -r api/requirements.txt
       - name: Compile API sources
-        run: python -m compileall services/request_authorization/api/app
+        run: python -m compileall api/app
 
   ui-pr:
     if: github.event_name == 'pull_request' && needs.changes.outputs.ui == 'true'
@@ -95,9 +95,9 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: services/request_authorization/ui/package-lock.json
+          cache-dependency-path: ui/package-lock.json
       - name: Build UI
-        working-directory: services/request_authorization/ui
+        working-directory: ui
         run: |
           npm ci
           npm run build
@@ -115,11 +115,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install build pytest grpcio protobuf
-          pip install -e ./services/request_authorization/client
+          pip install -e ./client
       - name: Run client tests
-        run: pytest -q services/request_authorization/client/tests
+        run: pytest -q client/tests
       - name: Build client package
-        working-directory: services/request_authorization/client
+        working-directory: client
         run: python -m build
 
   publish-server-image:
@@ -138,8 +138,8 @@ jobs:
           echo "date_tag=$(date -u +%Y%m%d).${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
-          context: ./services/request_authorization
-          file: ./services/request_authorization/server/Dockerfile
+          context: .
+          file: ./server/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/request-auth-server:${{ steps.tags.outputs.sha_tag }}
@@ -162,8 +162,8 @@ jobs:
           echo "date_tag=$(date -u +%Y%m%d).${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
-          context: ./services/request_authorization/api
-          file: ./services/request_authorization/api/Dockerfile
+          context: ./api
+          file: ./api/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/request-auth-api:${{ steps.tags.outputs.sha_tag }}
@@ -186,8 +186,8 @@ jobs:
           echo "date_tag=$(date -u +%Y%m%d).${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
-          context: ./services/request_authorization/ui
-          file: ./services/request_authorization/ui/Dockerfile
+          context: ./ui
+          file: ./ui/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/request-auth-ui:${{ steps.tags.outputs.sha_tag }}
@@ -211,7 +211,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install build twine
       - name: Fail if version already exists on PyPI
-        working-directory: services/request_authorization/client
+        working-directory: client
         run: |
           python - <<'PY'
           import pathlib, tomllib, urllib.error, urllib.request
@@ -230,10 +230,10 @@ jobs:
               raise SystemExit(f"{name}=={version} already exists on PyPI")
           PY
       - name: Build client package
-        working-directory: services/request_authorization/client
+        working-directory: client
         run: python -m build
       - name: Publish to PyPI
-        working-directory: services/request_authorization/client
+        working-directory: client
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
