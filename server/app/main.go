@@ -9,8 +9,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 
 	"github.com/dwilson/request-auth/db"
 	"github.com/dwilson/request-auth/metrics"
@@ -54,7 +56,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("listen %s: %v", grpcAddr, err)
 	}
-	grpcSrv := grpc.NewServer()
+	grpcSrv := grpc.NewServer(
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			MaxConnectionIdle: 5 * time.Minute,
+			Time:              30 * time.Second,
+			Timeout:           10 * time.Second,
+		}),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             10 * time.Second,
+			PermitWithoutStream: true,
+		}),
+	)
 	pb.RegisterPermitServiceServer(grpcSrv, service.NewPermitService(manager, inst))
 
 	// HTTP status server

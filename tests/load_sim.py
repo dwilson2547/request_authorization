@@ -15,13 +15,10 @@ Usage:
 
 import argparse
 import random
-import sys
 import threading
 import time
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "client"))
-from request_auth_client import RequestAuthClient  # noqa: E402
+from request_auth_client import RequestAuthClient
 
 
 def _pick_status(rate_429: float) -> int:

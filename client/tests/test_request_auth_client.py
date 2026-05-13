@@ -4,10 +4,6 @@ import threading
 import unittest
 from unittest.mock import MagicMock, patch
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "proto"))
-
 from proto import permit_pb2
 from request_auth_client import Permit, RequestAuthClient
 
