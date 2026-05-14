@@ -27,11 +27,8 @@ from typing import Optional
 
 import grpc
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "proto"))
-
-from proto import permit_pb2, permit_pb2_grpc  # noqa: E402
+from request_auth_proto import permit_pb2
+from request_auth_proto import permit_pb2_grpc
 
 
 class RequestAuthClient:

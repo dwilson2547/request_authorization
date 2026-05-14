@@ -16,7 +16,7 @@ Or from PyPI:
 pip install dwilson-request-auth-client
 ```
 
-**Requires:** Python 3.11+, `grpcio>=1.64.0`, `protobuf>=5.0.0`
+**Requires:** Python 3.11+, `grpcio>=1.80.0`, `protobuf>=6.31.1`
 
 ---
 

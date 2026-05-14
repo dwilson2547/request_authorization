@@ -9,7 +9,6 @@ works with a fresh pool — no container restarts needed between tests.
 """
 
 import subprocess
-import sys
 import time
 import uuid
 from pathlib import Path
@@ -17,9 +16,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-# Make the client library importable
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "client"))
-from request_auth_client import RequestAuthClient  # noqa: E402
+from request_auth_client import RequestAuthClient
 
 COMPOSE_FILE = Path(__file__).parent / "docker-compose.yaml"
 PROJECT_NAME = "request-auth-test"
